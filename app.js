@@ -9,10 +9,14 @@ GAME RULES:
 
 */
 
+var scores, roundScore, activePlayer, prevDice, winningScore;
+
+
 function init() {
     scores = [0, 0];
     roundScore = 0;
     activePlayer = 0;
+    prevDice = 0;
 
     document.getElementById('score-0').textContent = '0';
     document.getElementById('score-1').textContent = '0';
@@ -20,12 +24,15 @@ function init() {
     document.getElementById('current-1').textContent = '0'
 
     document.querySelector('.dice').style.display = 'none';
+    document.querySelector('.dice1').style.display = 'none';
 
     document.querySelector('.btn-roll').style.display = 'block';
     document.querySelector('.btn-hold').style.display = 'block';
 
     document.querySelector('.player-' + activePlayer + '-panel').classList.remove('winner');
     document.querySelector('.player-' + activePlayer + '-panel').classList.add('active');
+    // winningScore = document.getElementById('winscore').value;
+    // winningScore = winningScore === null || isNaN(winningScore) ? 50 : winningScore; 
 }
 
 init();
@@ -34,16 +41,29 @@ document.querySelector('.btn-roll').addEventListener('click', () => {
 
     // 1. Random Number
     var dice = Math.floor(Math.random() * 6) + 1;
+    var dice1 = Math.floor(Math.random() * 6) + 1;
+
+    // Check if the player rolls two 6s in a ro
 
     // 2. Display the result
     var diceDOM = document.querySelector('.dice');
     diceDOM.style.display = 'block';
     diceDOM.src = 'dice-' + dice + '.png';
+    var diceDOM1 = document.querySelector('.dice1');
+    diceDOM1.style.display = 'block';
+    diceDOM1.src = 'dice-' + dice1 + '.png';
 
     // 3. Update the round score only if the rolled number is not 1
-    if (dice !== 1) {
+    if (dice !== 1 && dice1 !== 1) {
         // Add score
-        roundScore += dice;
+        if (dice === 6 && prevDice === 6) {
+            roundScore = 0;
+            scores[activePlayer] = roundScore;
+            document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
+        } else {
+            roundScore += dice + dice1;
+            prevDice = dice;
+        }
         document.querySelector('#current-' + activePlayer).textContent = roundScore;
     } else {
         // Next Player
@@ -58,7 +78,7 @@ document.querySelector('.btn-hold').addEventListener('click', () => {
     // Update the UI
     document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
     // Check if player won the game
-    if (scores[activePlayer] >= 100) {
+    if (scores[activePlayer] >= winningScore) {
         document.getElementById('score-' + activePlayer).textContent = 'WON';
         document.querySelector('.btn-roll').style.display = 'none';
         document.querySelector('.btn-hold').style.display = 'none';
@@ -83,3 +103,7 @@ function nextPlayer() {
 }
 
 document.querySelector('.btn-new').addEventListener('click', init);
+
+document.getElementById('winscore').addEventListener('change', () => {
+    winningScore = document.getElementById('winscore').value;
+});
